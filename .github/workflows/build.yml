@@ -27,6 +27,18 @@ env:
 
 jobs:
   push-ghcr:
+   runs-on: ubuntu-latest
+
+    permissions: {}
+
+    name: Install Cosign
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.1.1
+        with:
+        l cosign-release: 'v2.1.1'
+    name: Check install!
+      run: cosign version
     name: Make
     runs-on: ubuntu-22.04
     permissions:

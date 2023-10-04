@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # SCRIPT VERSION
-USER_SETUP_VER=2
+USER_SETUP_VER=3
 USER_SETUP_VER_FILE="$HOME/.bazzite-configured"
 USER_SETUP_VER_RAN=$(cat $USER_SETUP_VER_FILE)
 
@@ -14,6 +14,8 @@ fi
 IMAGE_INFO="/usr/share/ublue-os/image-info.json"
 IMAGE_NAME=$(jq -r '."image-name"' < $IMAGE_INFO)
 BASE_IMAGE_NAME=$(jq -r '."base-image-name"' < $IMAGE_INFO)
+SYS_ID="$(cat /sys/devices/virtual/dmi/id/product_name)"
+PRODUCT_NAME="$(cat /sys/devices/virtual/dmi/id/product_name)"
 
 if [[ $BASE_IMAGE_NAME =~ "kinoite"  ]]; then
   echo 'Running setup for Kinoite'
@@ -21,7 +23,7 @@ if [[ $BASE_IMAGE_NAME =~ "kinoite"  ]]; then
   echo 'Enabling System76-Scheduler KWin script'
   kwriteconfig5 --file kwinrc --group Plugins --key kwin-system76-scheduler-integrationEnabled true
 
-  if [[ $IMAGE_NAME =~ "deck" ]]; then
+  if [[ $IMAGE_NAME =~ "deck" || $IMAGE_NAME =~ "ally" ]]; then
     echo 'Running setup for Kinoite on Steam Deck'
 
     echo 'Creating Desktop shortcuts'
@@ -67,7 +69,7 @@ else
     ln -s /usr/share/ublue-os/bazzite/themes/vgui2.json $HOME/.config/presets/user/vgui2.json
   fi
 
-  if [[ $IMAGE_NAME =~ "deck" ]]; then
+  if [[ $IMAGE_NAME =~ "deck" || $IMAGE_NAME =~ "ally" ]]; then
     echo 'Running setup for Silverblue on Steam Deck'
 
     echo 'Enabling Bazzite tofu menu fork'
@@ -106,6 +108,20 @@ else
     touch $HOME/.steam/.trackerignore
     mkdir -p $HOME/.local/share/Steam
     touch $HOME/.local/share/Steam/.trackerignore
+  fi
+fi
+
+# Steam Patch setup
+if [[ $IMAGE_NAME =~ "deck" || $IMAGE_NAME =~ "ally" ]]; then
+  if [[ \
+      ":ROG Ally RC71L_RC71L:" =~ ":$SYS_ID:" || \
+      ":AYA NEO:AYANEO:AIR Plus:" =~ ":$PRODUCT_NAME:" || \
+      "ONEXPLAYER" =~ "$PRODUCT_NAME" || \
+      "AOKZOE" =~ "$PRODUCT_NAME" || \
+      ":G1619-01:G1621-02:MicroPC:" =~ ":$SYS_ID:" \
+     ]]; then
+      mkdir -p "$HOME/.steam/steam/"
+      touch "$HOME/.steam/steam/.cef-enable-remote-debugging"
   fi
 fi
 
